@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brendinha, meu amor</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="shortcut icon" type="imagex/png" href="images/coracao.jpg">
+    <style>
+        /* Estilo da roleta inline, para não depender do CSS externo */
+        .roleta-container {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: #0d0d0d;
+            color: #d71f1f;
+        }
+
+        canvas {
+            background: #1a1a1a;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #f22121;
+        }
+
+        .roleta-container button {
+            margin-top: 30px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #D32F2F;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        #resultado {
+            margin-top: 20px;
+            font-size: 22px;
+            color: #ff69b4;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="page-container">
+        <div id="content-wrap">
+
+            <header>
+                <nav class="cabecalho">
+                    <span class="titulo"><a href="index.html">Olá meu amor!</a></span>
+                    <ul class="menu">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="history.html">Nossa história</a></li>
+                        <li><a href="future.html">Nosso futuro</a></li>
+                        <li><a href="game.html">Surpresa</a></li>
+                    </ul>
+
+                    <button onclick="animarMenu()" class="btn-menu" id="btn-menu">
+                        <span class="linha"></span>
+                        <span class="linha"></span>
+                        <span class="linha"></span>
+                    </button>
+
+                    <ul class="menu-mobile" id="menu-mobile">
+                        <nav>
+                            <li><a href="index.html">Home</a></li>
+                            <li><a href="history.html">Nossa história</a></li>
+                            <li><a href="future.html">Nosso futuro</a></li>
+                            <li><a href="game.html">Surpresa</a></li>
+                        </nav>
+                    </ul>
+                </nav>
+            </header>
+
+            <!-- Aqui começa a Roleta do Amor -->
+            <section class="roleta-container">
+                <h1>Roleta do Amor 🖤</h1>
+                <canvas id="roleta" width="400" height="400"></canvas>
+                <br>
+                <button onclick="girar()">Girar Roleta!</button>
+                <div id="resultado"></div>
+            </section>
+            <!-- Fim da Roleta -->
+
+        </div>
+    </div>
+
+    <script>
+        // JavaScript da roleta
+        const canvas = document.getElementById("roleta");
+        const ctx = canvas.getContext("2d");
+        const premios = [
+            "💋 1 Beijo",
+            "🤗 1 Abraço",
+            "🍫 Vale Chocolate",
+            "✨ Desejo Gratis",
+            "🥰 Massagem",
+            "🍝 Jantar Especial"
+        ];
+        const cores = ["#171717", "#841a1a"];
+        const total = premios.length;
+        const angulo = 2 * Math.PI / total;
+        let rotacaoAtual = 0;
+        let girando = false;
+        function easeOutCubic(t) {
+            return 1 - Math.pow(1 - t, 3);
+        }
+        function desenharRoleta() {
+            for (let i = 0; i < total; i++) {
+                ctx.beginPath();
+                ctx.fillStyle = cores[i % 2];
+                ctx.moveTo(200, 200);
+                ctx.arc(200, 200, 190, angulo * i + rotacaoAtual, angulo * (i + 1) + rotacaoAtual);
+                ctx.lineTo(200, 200);
+                ctx.fill();
+
+                ctx.save();
+                ctx.translate(200, 200);
+                ctx.rotate(angulo * i + angulo / 2 + rotacaoAtual);
+                ctx.textAlign = "right";
+                ctx.fillStyle = "white";
+                ctx.font = "16px Arial";
+                ctx.fillText(premios[i], 170, 10);
+                ctx.restore();
+            }
+
+            ctx.beginPath();
+            ctx.fillStyle = "#D32F2F";
+            ctx.moveTo(200, 20);
+            ctx.lineTo(190, 0);
+            ctx.lineTo(210, 0);
+            ctx.fill();
+            ;
+        }
+
+        function girar() {
+            if (girando) return;
+            girando = true;
+
+            const duracao = 5000; // duração da animação em ms
+            const inicio = performance.now();
+            const rotacaoInicial = rotacaoAtual;
+            const rotacaoFinal = rotacaoAtual + (Math.random() * 4 + 6) * 2 * Math.PI;
+
+            function animar(agora) {
+                const tempo = agora - inicio;
+                const progresso = Math.min(tempo / duracao, 1);
+                const easing = easeOutCubic(progresso);
+
+                rotacaoAtual = rotacaoInicial + (rotacaoFinal - rotacaoInicial) * easing;
+
+                ctx.clearRect(0, 0, 400, 400);
+                desenharRoleta();
+
+                if (progresso < 1) {
+                    requestAnimationFrame(animar);
+                } else {
+                    mostrarResultado();
+                    girando = false;
+                }
+            }
+
+            requestAnimationFrame(animar);
+        }
+
+        function mostrarResultado() {
+            const anguloFinal = (rotacaoAtual + Math.PI / 2) % (2 * Math.PI);
+            const indice = Math.floor((total - (anguloFinal / angulo)) % total);
+            document.getElementById("resultado").innerText = `Você ganhou: ${premios[indice]}`;
+        }
+
+        desenharRoleta();
+    </script>
+</body>
+
+</html>
